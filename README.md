@@ -2,6 +2,7 @@
 RUSSIAN:
 Итоговый проект по первому блоку обучения «Разработчик С++»  05/02/2023
 Программа чат версия 1.0
+Список разработчиков(1): Evgeny Volkov.
 Реализованы классы Message, User, Chat, все с родительскими классами (для гибкости дальнейшего развития программы).
     Класс Message, интерфейс:
     get_text() – текст сообщения
@@ -34,6 +35,7 @@ ENGLISH(translated from Russian : Yandex translator):
 
 Final project for the first block of training "C++ Developer" 05/02/2023
 Chat program version 1.0
+List of developers(1): Evgeny Volkov.
 Implemented classes Message, User, Chat, all with parent classes (for flexibility of further development of the program).
     Message class, interface:
     get_text() – message text
