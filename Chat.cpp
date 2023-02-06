@@ -1,11 +1,5 @@
 #include "Chat.h"
 
-void Chat::creat_user(std::string login, std::string password)
-{
-	User newUser(login, password);
-	_boxUsers.push_back(newUser);
-	_currentUser = std::make_shared<User>(newUser);
-}
 std::string Chat::get_name_for_id(const long long id)
 {
 	if (id == 0) return ""; //NO NAME
@@ -31,61 +25,6 @@ const long long Chat::get_id_for_name(const std::string name)
 		}
 	}
 	return 0; //NO NAME
-}
-void Chat::set_currentUser(const User& authorizer) //for authorization
-{
-	_currentUser = std::make_shared<User>(authorizer);
-	std::cout << "Authorization passed \n";
-}
-const bool Chat::check_login(const std::string& loginForCheck)
-{
-	for (auto& element : _boxUsers)
-	{
-		if (element.get_login() == loginForCheck)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-const bool Chat::check_password(const std::string& passwordForCheck)
-{
-	return false;
-}
-const bool Chat::check_name(const std::string& nameForCheck)
-{
-	for (auto& element : _boxUsers)
-	{
-		if (element.get_name() == nameForCheck)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-auto Chat::verification() //authorization
-{
-	std::string login;
-	std::string password;
-	std::cout
-		<< "Log in to your account \n"
-		<< "Login: ";
-	std::cin.ignore();
-	getline(std::cin, login);
-	std::cout
-		<< "Password: ";
-	std::cin >> password;
-	
-	for (auto& element : _boxUsers)
-	{
-		if (login == element.get_login() && password == element.get_password())
-		{
-			set_currentUser(element);
-			return true;
-		}
-	}
-	std::cout << "Erorr login/password invalid \n";
-	return false;
 }
 const std::string Chat::enter_login()
 {
@@ -122,6 +61,85 @@ const std::string Chat::enter_password()
 		<< "Password heck! \n"
 		<< "   *   *   *   *   *   *\n";
 	return buferPassword;
+}
+const bool Chat::check_login(const std::string& loginForCheck)
+{
+	for (auto& element : _boxUsers)
+	{
+		if (element.get_login() == loginForCheck)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+const bool Chat::check_password(const std::string& passwordForCheck)
+{
+	return false;
+}
+const bool Chat::check_name(const std::string& nameForCheck)
+{
+	for (auto& element : _boxUsers)
+	{
+		if (element.get_name() == nameForCheck)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+void Chat::creat_user(std::string login, std::string password)
+{
+	User newUser(login, password);
+	_boxUsers.push_back(newUser);
+	_currentUser = std::make_shared<User>(newUser);
+}
+void Chat::set_currentUser(const User& authorizer) //for authorization
+{
+	_currentUser = std::make_shared<User>(authorizer);
+	std::cout << "Authorization passed \n";
+}
+auto Chat::verification() //authorization
+{
+	std::string login;
+	std::string password;
+	std::cout
+		<< "Log in to your account \n"
+		<< "Login: ";
+	std::cin.ignore();
+	getline(std::cin, login);
+	std::cout
+		<< "Password: ";
+	std::cin >> password;
+	
+	for (auto& element : _boxUsers)
+	{
+		if (login == element.get_login() && password == element.get_password())
+		{
+			set_currentUser(element);
+			return true;
+		}
+	}
+	std::cout << "Erorr login/password invalid \n";
+	return false;
+}
+const long long Chat::counter_new_message()
+{
+	long long counter{};
+	for (auto& element : _boxMessages)
+	{	//we don't count the old ones
+		if (element.get_idMessage() <= _boxUsers.at(_currentUser->get_idUser() - 1).get_indicatorMessage())
+		{
+			continue;
+		}
+		//we do not consider private strangers
+		if (element.get_flagPrivacy() && (element.get_recipient() != _currentUser->get_idUser() ) )
+		{
+			continue;
+		}
+		++counter;
+	}
+	return counter;
 }
 void Chat::view_messages()
 {
@@ -208,23 +226,54 @@ void Chat::new_privat_message(long long addressee) /////////////////////////от
 
 	_boxMessages.push_back(newMessage);
 }
-const long long& Chat::counter_new_message()
+void Chat::strart_menu()
 {
-	long long counter{};
-	for (auto& element : _boxMessages)
-	{	//we don't count the old ones
-		if (element.get_idMessage() <= _boxUsers.at(_currentUser->get_idUser() - 1).get_indicatorMessage())
+	std::cout << "Welcome to the Chat! \n";
+	bool offChat{ true };
+	do
+	{
+		std::cout
+			<< "1 - Log in to your account \n"
+			<< "2 - Registration \n"
+			<< "0 - Output (to the desktop) \n"
+			<< "select: \n";
+		char mode{};
+		std::cin >> mode;
+		system("cls");
+
+		switch (mode)
 		{
-			continue;
-		}
-		//we do not consider private strangers
-		if (element.get_flagPrivacy() && (element.get_recipient() != _currentUser->get_idUser() ) )
+		case '1':
 		{
-			continue;
+			if (verification() )
+			{
+				system("cls");
+				working_session();
+			}
+			break;
 		}
-		++counter;
-	}
-	return counter;
+
+		case '2':
+			try
+			{
+				registration();
+			}
+			catch (const std::exception & e)
+			{
+				std::cout << e.what() << "\n";
+			}
+			break;
+
+		case '0':
+			offChat = false;
+			std::cout << "Exit the program, see U later! \n";
+			break;
+
+		default:
+			std::cout << "Input error. Repeat \n";
+			break;
+		}
+	} while (offChat);
 }
 void Chat::registration()
 {
@@ -275,7 +324,6 @@ void Chat::working_session()
 			break;
 
 		case '0':
-			_currentUser == nullptr;
 			system("cls");
 			offWorkingSession = false;
 			break;
@@ -284,53 +332,4 @@ void Chat::working_session()
 			break;
 		}
 	} while (offWorkingSession);
-}
-void Chat::strart_menu()
-{
-	std::cout << "Welcome to the Chat! \n";
-	bool offChat{ true };
-	do
-	{
-		std::cout
-			<< "1 - Log in to your account \n"
-			<< "2 - Registration \n"
-			<< "0 - Output (to the desktop) \n"
-			<< "select: \n";
-		char mode{};
-		std::cin >> mode;
-		system("cls");
-
-		switch (mode)
-		{
-		case '1':
-		{
-			if (verification() )
-			{
-				system("cls");
-				working_session();
-			}
-			break;
-		}
-
-		case '2':
-			try
-			{
-				registration();
-			}
-			catch (const std::exception & e)
-			{
-				std::cout << e.what() << "\n";
-			}
-			break;
-
-		case '0':
-			offChat = false;
-			std::cout << "Exit the program, see U later! \n";
-			break;
-
-		default:
-			std::cout << "Input error. Repeat \n";
-			break;
-		}
-	} while (offChat);
 }
